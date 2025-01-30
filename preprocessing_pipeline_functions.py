@@ -612,12 +612,19 @@ def resample_ROIs(ROIs_df, pinstate, camera_fps=60, target_fps=40, body_part='he
 
     return resampled_body_part
 
-def resample_headDirections(HD_df, pinstate, camera_fps=60, target_fps=40, body_part = 'head_back'):
-    
+def resample_headDirections(HD_df, pinstate, camera_fps=60, target_fps=40):
     """
-    takes in HD dataframe and pinstate and returns
-    a resampled and first sync pulse truncated
-    list of xy coordinates from a select stable bodypart
+    Resamples head direction data from a given dataframe to a target frames per second (FPS) 
+    and trims the data to start after the first synchronization pulse.
+    Parameters:
+    HD_df (pd.DataFrame): DataFrame containing head direction data for between ears and head front to back 
+                            directions.
+    pinstate (np.array): Array representing the pin state used to detect synchronization pulses.
+    camera_fps (int, optional): The original frames per second of the camera. Default is 60.
+    target_fps (int, optional): The target frames per second to resample the data to. Default is 40.
+    Returns:
+    pd.DataFrame: A DataFrame containing the resampled head direction data starting from the 
+                    first synchronization pulse.
     """
 
     sync_indices = np.where(pinstate > np.median(pinstate))[0]
@@ -629,13 +636,22 @@ def resample_headDirections(HD_df, pinstate, camera_fps=60, target_fps=40, body_
     print("Trimming data to start after the first sync pulse...")
     HD_df_trimmed = HD_df[first_sync_idx:]
 
-    print(f"Resampling data from {camera_fps} FPS to {target} FPS...")
-    resample_factor = target_fps / camera_fps
+    print(f"Resampling data from {camera_fps} FPS to {target_fps} FPS...")
+    resample_factor = camera_fps / target_fps
 
     HD_resampled = pd.DataFrame()
 
     for column in HD_df_trimmed.columns:
-        resampled_column = resample(HD_df_trimmed[column].values, resampled_length)
+        # Convert angles from -180 to 180 to 0 to 359.999
+        HD_df_trimmed[column] = (HD_df_trimmed[column] + 180) % 360
+
+        # Interpolate to avoid boundary issues
+        x = np.arange(len(HD_df_trimmed[column]))
+        x_new = np.linspace(0, len(HD_df_trimmed[column]) - 1, int(len(HD_df_trimmed[column]) / resample_factor))
+        resampled_column = np.interp(x_new, x, HD_df_trimmed[column])
+
+        # Ensure resampled values are within 0 to 359.999
+        resampled_column = resampled_column % 360
         HD_resampled[column] = resampled_column
     
     return HD_resampled

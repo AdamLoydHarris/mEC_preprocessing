@@ -266,7 +266,7 @@ def get_awake_sessions_info(ephys_filepath, metadata_awake):
     Tracking_timestamp = filtered_awake["Tracking"]
     Behaviour_timestamp = filtered_awake["Behaviour"]
 
-    return date, Structure, Structure_abstract, Structure_no, Tracking_timestamp, Behaviour_timestamp
+    return Structure, Structure_abstract, Structure_no, Tracking_timestamp, Behaviour_timestamp
 
 
 def get_behaviour_txt(data_path, mouse, cohort, date, Behaviour_timestamp, Structure_abstract, int_subject_IDs=True):
@@ -674,6 +674,7 @@ def align_to_first_A(offset_bin, xy, ROIs, head_direction, ephys_mat):
     aligned_xy = xy[offset_bin:]
     aligned_ROIs = ROIs.iloc[offset_bin:].reset_index(drop=True)
     aligned_head_direction = head_direction.iloc[offset_bin:].reset_index(drop=True)
+    if ephys_mat != None
     aligned_ephys_mat = ephys_mat[:, offset_bin:]
 
     return aligned_xy, aligned_ROIs, aligned_head_direction, aligned_ephys_mat

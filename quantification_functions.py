@@ -349,8 +349,7 @@ def get_behaviour_txt(Behaviourfile_path, Structure_abstract="ABCD"):
 
     # Extract and store session data.
 
-    state_IDs = eval(next(line for line in all_lines if line[0]=='S')[2:])
-    event_IDs = eval(next(line for line in all_lines if line[0]=='E')[2:])
+      event_IDs = eval(next(line for line in all_lines if line[0]=='E')[2:])
     variable_lines = [line[2:] for line in all_lines if line[0]=='V']
 
     if Structure_abstract not in ['ABCD','AB','ABCDA2','ABCDE','ABCAD']:
@@ -374,7 +373,6 @@ def get_behaviour_txt(Behaviourfile_path, Structure_abstract="ABCD"):
                     for event_name in ID2name.values()}
   
     return times, variable_lines
-
 
 def get_nearest_txt_timestamp(h5_path, mouse):
     # Extract the timestamp from the h5 filename
